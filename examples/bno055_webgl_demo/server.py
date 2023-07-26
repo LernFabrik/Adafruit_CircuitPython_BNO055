@@ -48,6 +48,12 @@ CALIBRATION_FILE = "calibration.json"
 #                   'y_sign': BNO055.AXIS_REMAP_POSITIVE,
 #                   'z_sign': BNO055.AXIS_REMAP_NEGATIVE }
 
+BNO_AXIS_REMAP = (adafruit_bno055.AXIS_REMAP_X, 
+adafruit_bno055.AXIS_REMAP_Z,
+adafruit_bno055.AXIS_REMAP_Y,
+adafruit_bno055.AXIS_REMAP_POSITIVE,
+adafruit_bno055.AXIS_REMAP_POSITIVE,
+adafruit_bno055.AXIS_REMAP_NEGATIVE)
 
 # Create flask application.
 app = flask.Flask(__name__)
@@ -102,7 +108,7 @@ def bno_sse():
             # up the lock.
             heading, roll, pitch = bno_data["euler"]
             temp = bno_data["temp"]
-            x, y, z, w = bno_data["quaternion"]
+            w, x, y, z = bno_data["quaternion"]
             sys, gyro, accel, mag = bno_data["calibration"]
         # Send the data to the connected client in HTML5 server sent event format.
         data = {
@@ -130,6 +136,7 @@ def start_bno_thread():
     # See this SO question for more context:
     #   http://stackoverflow.com/questions/24617795/starting-thread-while-running-flask-with-debug
     global bno_thread  # pylint: disable=global-statement
+    bno.axis_remap = BNO_AXIS_REMAP
     # Kick off BNO055 reading thread.
     bno_thread = threading.Thread(target=read_bno)
     bno_thread.daemon = True  # Don't let the BNO reading thread block exiting.
